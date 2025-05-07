@@ -1,0 +1,230 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h> //This library you can add via Include Library > Manage Library > 
+LiquidCrystal_I2C lcd(0x27, 16,2);
+#include <SoftwareSerial.h> 
+SoftwareSerial gsm(8,9);// rx tx
+#define led1 A0
+#define led2 A1
+#define led3 A2
+#define led4 A3
+#define button 7
+int ddd=0;
+int flag=0;
+int counter=0,bt=0;
+int onetime=0,onetime1=0,onetime2=0;
+int tim =0;
+int sos=0;
+#include <Servo.h>
+Servo myservo,myservo1; 
+void setup() 
+{
+ Serial.begin(9600);
+ gsm.begin(9600);
+ lcd.init();   // initializing the LCD
+ lcd.backlight(); // Enable or Turn On the backlight
+ lcd.setCursor(0,0); 
+ lcd.print("Smart Pill");
+ lcd.setCursor(0,1); 
+ pinMode(button,INPUT_PULLUP);
+ lcd.print("Dispensor");
+ pinMode(6,OUTPUT);
+ pinMode(5,OUTPUT);
+ myservo.attach(3);  // attaches the servo on pin 5 to the servo object
+ myservo.write(0);
+ digitalWrite(5,HIGH);
+ pinMode(button,INPUT_PULLUP);
+ pinMode(led1,OUTPUT);
+ pinMode(led2,OUTPUT);
+ pinMode(led3,OUTPUT);
+ pinMode(led4,OUTPUT);
+ digitalWrite(led1,LOW);
+ digitalWrite(led2,LOW);
+ digitalWrite(led3,LOW);
+ digitalWrite(led4,LOW);
+ delay(10000);
+ lcd.clear();
+}
+void loop() 
+{
+ trackingD();
+ med1();
+ call();
+ tim=0;
+ lcd.clear();
+ trackingD();
+ med2();
+ call();
+ tim=0;
+ lcd.clear();
+ trackingD();
+ med3();
+ call();
+ tim=0;
+ lcd.clear();
+ trackingD();
+ med4();
+ call();
+ tim=0;
+ lcd.clear();
+ finish(); 
+ while(1);
+}
+
+void med1()
+{
+  ddd=0;
+  lcd.setCursor(0,0); 
+  lcd.print("T1 medicine");
+  counter=counter+1;
+  digitalWrite(6,HIGH);
+  digitalWrite(5,LOW);
+  digitalWrite(led1,HIGH);
+  delay(1000);
+  digitalWrite(6,LOW);  
+   myservo.write(45);
+}
+
+void med2()
+{
+   ddd=0;
+   lcd.setCursor(0,0); 
+   lcd.print("T2 medicine");
+   counter=counter+1;
+   digitalWrite(6,HIGH);
+   digitalWrite(5,LOW);
+   digitalWrite(led2,HIGH);
+   delay(1000);
+   digitalWrite(6,LOW); 
+   myservo.write(90); 
+}
+void med3()
+{
+   ddd=0;
+   lcd.setCursor(0,0); 
+   lcd.print("T3 medicine");
+   counter=counter+1;
+   digitalWrite(6,HIGH);
+   digitalWrite(5,LOW);
+   digitalWrite(led3,HIGH);                   
+   delay(1000); 
+   digitalWrite(6,LOW); 
+   myservo.write(135); 
+}
+
+void med4()
+{
+   ddd=0;
+   lcd.setCursor(0,0); 
+   lcd.print("T4 medicine");
+   counter=counter+1;
+   digitalWrite(6,HIGH);
+   digitalWrite(5,LOW);
+   digitalWrite(led4,HIGH);                   
+   delay(1000); 
+   digitalWrite(6,LOW); 
+   myservo.write(180); 
+}
+
+void finish()
+{
+ trackingF();
+ counter=0;
+ lcd.setCursor(0,1); 
+ lcd.print("Medicine Finish");
+ digitalWrite(6,LOW);  
+ delay(500);
+ while(1);
+}
+
+void call()
+{
+ for(flag=0;flag<30;flag++)
+ { 
+  tim=tim+1;
+  lcd.clear();
+  lcd.setCursor(0,1); 
+  lcd.print("Delay ");
+  lcd.setCursor(8,1); 
+  lcd.print(tim);
+  delay(1000);  
+  bt=digitalRead(button);
+  if(bt==LOW)
+  {
+   digitalWrite(led1,LOW);
+   digitalWrite(led2,LOW);
+   digitalWrite(led3,LOW);
+   digitalWrite(led4,LOW);
+   tracking();
+   ddd=1;
+  }  
+  if(flag==5)
+  {
+   if(ddd==0)
+   {
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+    digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);digitalWrite(6,HIGH); delay(100);digitalWrite(6,LOW);delay(50);
+   }
+  }
+ }
+}
+void init_sms1()
+ {
+  gsm.println("AT+CMGF=1");
+  delay(400);
+  gsm.println("AT+CMGS=\"+918307070417\"");   // use your 10 digit cell no. heregsm.println("AT+CMGS=\"+919311747989\"");
+  delay(400);
+ }
+ 
+void send_data(String message)
+{
+ gsm.println(message);
+ //delay(100);
+}
+
+void send_sms()
+{
+ gsm.write(26);
+}
+void tracking()
+{
+ digitalWrite(6,HIGH);
+    lcd.setCursor(0,1);
+    lcd.print("sending sms.......");
+    init_sms1();
+    send_data("Pick medicine done");
+    send_sms();
+    delay(6000);
+    digitalWrite(6,LOW);
+    lcd.clear();
+}
+void trackingD()
+{
+ digitalWrite(6,HIGH);
+    lcd.setCursor(0,1);
+    lcd.print("sending sms.......");
+    init_sms1();
+    send_data("Medicine Dispense");
+    send_sms();
+    delay(6000);
+    digitalWrite(6,LOW);
+    lcd.clear();
+}
+
+void trackingF()
+{
+ digitalWrite(6,HIGH);
+    lcd.setCursor(0,1);
+    lcd.print("sending sms.......");
+    init_sms1();
+    send_data("Medicine Finished");
+    send_sms();
+    delay(6000);
+    digitalWrite(6,LOW);
+    lcd.clear();
+}
